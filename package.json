@@ -6,8 +6,7 @@
   "scripts": {
     "watch": "watchify client/main.js -o public/app.js -v",
     "build": "browserify client/main.js -o public/app.js",
-    "run": "npm run watch nodemon server.js",
-    "start": "npm run build & node server.js"
+    "start": "npm run watch & nodemon server.js"
   },
   "repository": {
     "type": "git",

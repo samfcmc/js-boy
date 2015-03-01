@@ -1,5 +1,5 @@
 console.log('test');
 
 window.test = function() {
-	alert('Ola');
+	alert('Hello world!');
 }
