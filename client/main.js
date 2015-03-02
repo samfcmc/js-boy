@@ -1,5 +1,7 @@
+'use strict';
+
+var CPU = require('./cpu');
+
 console.log('test');
 
-window.test = function() {
-	alert('Hello world!');
-}
+window.CPU = CPU;
