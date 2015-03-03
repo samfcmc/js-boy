@@ -5,23 +5,102 @@
  */
 
 module.exports = {
-	// Read Byte (8 bits)
-	rb: function(addr) {
-		//TODO:
-	},
+	// Flag indicating BIOS is mapped in
+  // BIOS is unmapped with the first instruction above 0x00FF
+		inbios: 1,
 
-	// Read Word (16 bits)
-	rw: function(addr) {
-		//TODO:
-	},
+    // Memory regions (initialised at reset time)
+    bios: [],
+    rom: [],
+    wram: [],
+    eram: [],
+    zram: [],
 
-	// Write Byte (8 bits)
-	wb: function(addr) {
-		//TODO:
-	},
+		rb: function(cpu, address) {
+			switch(address & 0xF000) {
+				// BIOS (256b)/ROM0
+				case 0x0000:
+					if(this.inbios) {
+						if(address < 0x0100) {
+							return this.bios[addr];
+						}
+		    		else if(cpu.registers.pc == 0x0100) {
+							this.inbios = 0;
+						}
+					}
 
-	// Write word (8 bits)
-	ww: function(addr) {
-		//TODO:
-	}
+					return this.rom[address];
+				// ROM0
+		    case 0x1000:
+		    case 0x2000:
+		    case 0x3000:
+		        return this.rom[address];
+				// ROM1 (unbanked) (16k)
+		    case 0x4000:
+		    case 0x5000:
+		    case 0x6000:
+		    case 0x7000:
+		        return this.rom[address];
+				// Graphics: VRAM (8k)
+		    case 0x8000:
+		    case 0x9000:
+		        return GPU.vram[addr & 0x1FFF];
+				// External RAM (8k)
+		    case 0xA000:
+		    case 0xB000:
+		        return this.eram[addr & 0x1FFF];
+				// Working RAM (8k)
+		    case 0xC000:
+		    case 0xD000:
+		        return this.wram[addr & 0x1FFF];
+				// Working RAM shadow
+			  case 0xE000:
+		        return this.wram[addr & 0x1FFF];
+						// Working RAM shadow, I/O, Zero-page RAM
+			    case 0xF000:
+			        switch(addr & 0x0F00) {
+						    // Working RAM shadow
+						    case 0x000:
+								case 0x100:
+								case 0x200:
+								case 0x300:
+						    case 0x400:
+								case 0x500:
+								case 0x600:
+								case 0x700:
+						    case 0x800:
+								case 0x900:
+								case 0xA00:
+								case 0xB00:
+						    case 0xC00:
+								case 0xD00:
+						        return this.wram[addr & 0x1FFF];
+
+						    // Graphics: object attribute memory
+						    // OAM is 160 bytes, remaining bytes read as 0
+						    case 0xE00:
+						        if(addr < 0xFEA0) {
+											return GPU.oam[addr & 0xFF];
+										}
+										else {
+											return 0;
+										}
+						    // Zero-page
+						    case 0xF00:
+						        if(addr >= 0xFF80) {
+							    		return MMU._zram[addr & 0x7F];
+										}
+										else {
+										    // I/O control handling
+										    // Currently unhandled
+										    return 0;
+										}
+							}
+			}
+
+		},
+		// Read a 16-bit word
+    rw: function(addr) {
+			return this.rb(addr) + (this.rb(addr+1) << 8);
+    }
 };
