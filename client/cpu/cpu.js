@@ -5,13 +5,14 @@ var Instructions = require('./instructions');
 var MMU = require('./mmu');
 var Map = require('./map');
 
-var CPU = {
+module.exports = {
     // Time clock: The Z80 holds two types of clock (m and t)
     clock: {m:0, t:0},
 
     // Register set
     registers: new Registers(),
     mmu: MMU,
+    instructions: Instructions,
     map: Map(Instructions),
 
     reset: function() {
@@ -31,6 +32,3 @@ var CPU = {
     },
 
 };
-
-module.exports = CPU;
-

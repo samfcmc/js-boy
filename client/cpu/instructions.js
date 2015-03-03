@@ -23,7 +23,8 @@ module.exports =  {
 
     // No-operation (NOP)
     NOP: function(cpu) {
-        cpu.registers.m = 1; cpu.registers.t = 4;                // 1 M-time taken
+        cpu.registers.m = 1;
+        cpu.registers.t = 4;                // 1 M-time taken
     },
 
     // Push registers B and C to the stack (PUSH BC)
