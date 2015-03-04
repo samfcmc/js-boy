@@ -1,22 +1,21 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"/home/samuel/dev/projects/js-boy/client/cpu/cpu.js":[function(require,module,exports){
 'use strict';
 
-var Registers = require('./registers');
-var Instructions = require('./instructions');
-var MMU = require('./mmu');
-var Map = require('./map');
+module.exports = function(registers, mmu, instructions, map) {
 
-var CPU = {
+  return {
+
     // Time clock: The Z80 holds two types of clock (m and t)
     clock: {m:0, t:0},
 
     // Register set
-    registers: new Registers(),
-    mmu: MMU,
-    map: Map(Instructions),
+    registers: registers,
+    mmu: mmu,
+    instructions: instructions,
+    map: map,
 
     reset: function() {
-    	this.registers = new Registers();
+    	this.registers.reset();
     	this.clock.m = 0;
     	this.clock.t = 0;
     },
@@ -31,20 +30,35 @@ var CPU = {
     	}
     },
 
+    execOpcode: function(opcode) {
+      this.map[opcode](this);
+    }
+
+  }
+
 };
 
-module.exports = CPU;
-
-
-},{"./instructions":"/home/samuel/dev/projects/js-boy/client/cpu/instructions.js","./map":"/home/samuel/dev/projects/js-boy/client/cpu/map.js","./mmu":"/home/samuel/dev/projects/js-boy/client/cpu/mmu.js","./registers":"/home/samuel/dev/projects/js-boy/client/cpu/registers.js"}],"/home/samuel/dev/projects/js-boy/client/cpu/index.js":[function(require,module,exports){
+},{}],"/home/samuel/dev/projects/js-boy/client/cpu/index.js":[function(require,module,exports){
 'use strict';
 
-
+var Registers = require('./registers');
+var Instructions = require('./instructions');
+var MMU = require('./mmu');
+var Map = require('./map');
 var CPU = require('./cpu');
 
-module.exports = CPU;
+module.exports = function() {
 
-},{"./cpu":"/home/samuel/dev/projects/js-boy/client/cpu/cpu.js"}],"/home/samuel/dev/projects/js-boy/client/cpu/instructions.js":[function(require,module,exports){
+  var registers = new Registers();
+  var mmu = MMU;
+  var instructions = Instructions;
+  var map = Map(instructions);
+
+  return new CPU(registers, mmu, instructions, map);
+
+};
+
+},{"./cpu":"/home/samuel/dev/projects/js-boy/client/cpu/cpu.js","./instructions":"/home/samuel/dev/projects/js-boy/client/cpu/instructions.js","./map":"/home/samuel/dev/projects/js-boy/client/cpu/map.js","./mmu":"/home/samuel/dev/projects/js-boy/client/cpu/mmu.js","./registers":"/home/samuel/dev/projects/js-boy/client/cpu/registers.js"}],"/home/samuel/dev/projects/js-boy/client/cpu/instructions.js":[function(require,module,exports){
 'use strict';
 
 module.exports =  {
@@ -70,7 +84,8 @@ module.exports =  {
 
     // No-operation (NOP)
     NOP: function(cpu) {
-        cpu.registers.m = 1; cpu.registers.t = 4;                // 1 M-time taken
+        cpu.registers.m = 1;
+        cpu.registers.t = 4;                // 1 M-time taken
     },
 
     // Push registers B and C to the stack (PUSH BC)
@@ -110,11 +125,17 @@ module.exports =  {
 module.exports = function(instructions) {
 
 	return [
+		//0x00
 		instructions.NOP,
-	    instructions.LDBCnn,
-	    instructions.LDBCmA,
-	    instructions.INCBC,
-	    instructions.INCr_b,
+		//0x01
+	  instructions.LDBCnn,
+		//0x02
+  	instructions.LDBCmA,
+		//0x03
+	  instructions.INCBC,
+		//0x04
+	  instructions.INCr_b
+		//TODO: Add the others
 	];
 
 };
@@ -232,23 +253,39 @@ module.exports = {
 
 var Registers = function() {
 	return {
-		a:0, 
-        b:0, 
-        c:0, 
-        d:0, 
-        e:0, 
-        h:0, 
-        l:0, 
-        f:0,    // 8-bit registers
-        pc:0, 
-        sp:0,  	// 16-bit registers
-        m:0, 
-        t:0     // Clock for last instr
-	}
-        
+		a:0,
+    b:0,
+    c:0,
+    d:0,
+    e:0,
+    h:0,
+    l:0,
+    f:0,    // 8-bit registers
+    pc:0,
+    sp:0,  	// 16-bit registers
+    m:0,
+    t:0,     // Clock for last instr
+
+		reset: function() {
+			this.a = 0;
+			this.b = 0;
+			this.c = 0;
+			this.d = 0;
+			this.e = 0;
+			this.h = 0;
+			this.l = 0;
+			this.f = 0;
+			this.pc = 0;
+			this.sp = 0;
+			this.m = 0;
+			this.t = 0;
+		}
+	};
+
 };
 
 module.exports = Registers;
+
 },{}],"/home/samuel/dev/projects/js-boy/client/main.js":[function(require,module,exports){
 'use strict';
 

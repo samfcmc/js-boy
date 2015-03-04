@@ -7,11 +7,17 @@
 module.exports = function(instructions) {
 
 	return [
+		//0x00
 		instructions.NOP,
-	    instructions.LDBCnn,
-	    instructions.LDBCmA,
-	    instructions.INCBC,
-	    instructions.INCr_b,
+		//0x01
+	  instructions.LDBCnn,
+		//0x02
+  	instructions.LDBCmA,
+		//0x03
+	  instructions.INCBC,
+		//0x04
+	  instructions.INCr_b
+		//TODO: Add the others
 	];
 
 };

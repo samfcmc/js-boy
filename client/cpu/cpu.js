@@ -1,22 +1,20 @@
 'use strict';
 
-var Registers = require('./registers');
-var Instructions = require('./instructions');
-var MMU = require('./mmu');
-var Map = require('./map');
+module.exports = function(registers, mmu, instructions, map) {
 
-module.exports = {
+  return {
+
     // Time clock: The Z80 holds two types of clock (m and t)
     clock: {m:0, t:0},
 
     // Register set
-    registers: new Registers(),
-    mmu: MMU,
-    instructions: Instructions,
-    map: Map(Instructions),
+    registers: registers,
+    mmu: mmu,
+    instructions: instructions,
+    map: map,
 
     reset: function() {
-    	this.registers = new Registers();
+    	this.registers.reset();
     	this.clock.m = 0;
     	this.clock.t = 0;
     },
@@ -30,5 +28,11 @@ module.exports = {
 		    this.clock.t += this.registers.t;
     	}
     },
+
+    execOpcode: function(opcode) {
+      this.map[opcode](this);
+    }
+
+  }
 
 };
