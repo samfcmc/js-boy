@@ -1,3 +1,10 @@
 language: node_js
 node_js:
-  - "0.10"
+- '0.10'
+deploy:
+  provider: heroku
+  api_key:
+    secure: i4yRiSs5uxLH9suQqAaqnVD3Q5rY+d5g86MoPNuGqpUSKgEsF0bhylw0dReFy52/tCFVnSL0k99/DTdqjLCsrLoPIGe4SZg1G32vJCbKOA2G8rSp0oqAGJr/hW9bP31dzHcTTrC4B/j0ELFrY5R9WVI6cW/1YP2KWVGGTQcuH7s=
+  app: warm-taiga-8207
+  on:
+    repo: samfcmc/js-boy
